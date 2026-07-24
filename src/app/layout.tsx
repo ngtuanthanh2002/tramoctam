@@ -67,6 +67,11 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [{ url: "/images/hero.webp", type: "image/webp" }],
+    shortcut: "/images/hero.webp",
+    apple: "/images/hero.webp",
+  },
 };
 
 export const viewport: Viewport = {

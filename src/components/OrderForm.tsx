@@ -51,13 +51,13 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
           <div className="mb-3 border-t border-dashed border-white/70 pt-3">
             <h2
               id={`${id}-heading`}
-              className="flex items-start gap-2 text-center text-[15px] font-bold uppercase leading-snug tracking-wide sm:text-base"
+              className="flex items-start gap-2 text-center text-[14px] font-bold uppercase leading-snug tracking-wide sm:text-[15px]"
             >
               <span aria-hidden className="mt-0.5 shrink-0 text-lg">
                 🛒
               </span>
               <span className="flex-1">
-                Vui lòng điền thông tin bên dưới để mua với giá ưu đãi
+                VUI LÒNG ĐIỀN THÔNG TIN BÊN DƯỚI ĐỂ MUA VỚI GIÁ ƯU ĐÃI
               </span>
             </h2>
           </div>
@@ -132,7 +132,7 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
               disabled={submitting}
               className="animate-pulse-cta h-12 w-full rounded-lg bg-brand-green text-base font-bold uppercase tracking-wide text-white shadow-md transition hover:bg-[var(--brand-green-dark)] disabled:opacity-70"
             >
-              {submitting ? "Đang gửi..." : "Đặt mua ngay"}
+              {submitting ? "ĐANG GỬI..." : "ĐẶT MUA NGAY"}
             </button>
           </form>
         </div>
