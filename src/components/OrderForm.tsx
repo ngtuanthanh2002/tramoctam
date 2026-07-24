@@ -7,6 +7,9 @@ type OrderFormProps = {
   id?: string;
 };
 
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbyrxEMhwufRRp1ishEW20M0Iz2jTT4dA1MugxmxY1pQU-tD4oUWjuOdIgNCA-H3jY4/exec";
+
 export default function OrderForm({ id = "order-form" }: OrderFormProps) {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -14,30 +17,54 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
   const [packageId, setPackageId] = useState(PACKAGES[0].id);
   const [submitting, setSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!fullName.trim() || !phone.trim() || !address.trim()) return;
 
-    setSubmitting(true);
-
-    // Placeholder: wire to your CRM / Google Sheet / API later
     const selected = PACKAGES.find((p) => p.id === packageId);
-    console.info("Order submitted", {
-      fullName,
-      phone,
-      address,
-      package: selected?.label,
-    });
+    if (!selected) return;
 
-    window.setTimeout(() => {
-      setSubmitting(false);
+    setSubmitting(true);
+    setError("");
+
+    const payload = {
+      fullName: fullName.trim(),
+      phone: phone.trim(),
+      address: address.trim(),
+      packageLabel: selected.label,
+      price: selected.price,
+    };
+
+    try {
+      // text/plain tránh preflight CORS với Google Apps Script
+      const res = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload),
+        redirect: "follow",
+      });
+
+      const data = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+      } | null;
+
+      if (!res.ok || data?.ok === false) {
+        throw new Error(data?.error || "Gửi đơn thất bại");
+      }
+
       setShowSuccess(true);
       setFullName("");
       setPhone("");
       setAddress("");
       setPackageId(PACKAGES[0].id);
-    }, 400);
+    } catch {
+      setError("Không gửi được đơn. Vui lòng thử lại hoặc gọi hotline.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -73,7 +100,8 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Họ và tên"
-              className="h-11 w-full rounded-lg border-0 bg-white px-4 text-[15px] text-gray-800 outline-none placeholder:text-gray-400"
+              disabled={submitting}
+              className="h-11 w-full rounded-lg border-0 bg-white px-4 text-[15px] text-gray-800 outline-none placeholder:text-gray-400 disabled:opacity-70"
             />
 
             <label className="sr-only" htmlFor={`${id}-phone`}>
@@ -88,7 +116,8 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Số điện thoại"
-              className="h-11 w-full rounded-lg border-0 bg-white px-4 text-[15px] text-gray-800 outline-none placeholder:text-gray-400"
+              disabled={submitting}
+              className="h-11 w-full rounded-lg border-0 bg-white px-4 text-[15px] text-gray-800 outline-none placeholder:text-gray-400 disabled:opacity-70"
             />
 
             <label className="sr-only" htmlFor={`${id}-address`}>
@@ -101,10 +130,14 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               placeholder="Địa chỉ"
-              className="h-11 w-full rounded-lg border-0 bg-white px-4 text-[15px] text-gray-800 outline-none placeholder:text-gray-400"
+              disabled={submitting}
+              className="h-11 w-full rounded-lg border-0 bg-white px-4 text-[15px] text-gray-800 outline-none placeholder:text-gray-400 disabled:opacity-70"
             />
 
-            <fieldset className="rounded-lg bg-white p-3 text-gray-800">
+            <fieldset
+              className="rounded-lg bg-white p-3 text-gray-800"
+              disabled={submitting}
+            >
               <legend className="sr-only">Chọn gói mua</legend>
               <div className="flex flex-col gap-2.5">
                 {PACKAGES.map((pkg) => (
@@ -127,12 +160,28 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
               </div>
             </fieldset>
 
+            {error && (
+              <p className="rounded-lg bg-red-600/90 px-3 py-2 text-center text-[13px] text-white">
+                {error}
+              </p>
+            )}
+
             <button
               type="submit"
               disabled={submitting}
-              className="animate-pulse-cta h-12 w-full rounded-lg bg-brand-green text-base font-bold uppercase tracking-wide text-white shadow-md transition hover:bg-[var(--brand-green-dark)] disabled:opacity-70"
+              className="animate-pulse-cta flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-brand-green text-base font-bold uppercase tracking-wide text-white shadow-md transition hover:bg-[var(--brand-green-dark)] disabled:cursor-not-allowed disabled:opacity-80 disabled:animate-none"
             >
-              {submitting ? "ĐANG GỬI..." : "ĐẶT MUA NGAY"}
+              {submitting ? (
+                <>
+                  <span
+                    className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"
+                    aria-hidden
+                  />
+                  <span>ĐANG GỬI...</span>
+                </>
+              ) : (
+                "ĐẶT MUA NGAY"
+              )}
             </button>
           </form>
         </div>
@@ -146,15 +195,21 @@ export default function OrderForm({ id = "order-form" }: OrderFormProps) {
           aria-labelledby={`${id}-success-title`}
         >
           <div className="w-full max-w-sm rounded-xl bg-white p-6 text-center shadow-xl">
+            <div
+              className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-brand-green/15 text-3xl text-brand-green"
+              aria-hidden
+            >
+              ✓
+            </div>
             <h3
               id={`${id}-success-title`}
               className="mb-2 text-xl font-bold text-gray-900"
             >
-              Cảm Ơn!
+              Đã đặt mua thành công!
             </h3>
             <p className="mb-5 text-[15px] leading-relaxed text-gray-600">
-              Nội dung của anh chị đã được ghi nhận! Vui lòng để ý điện thoại,
-              chúng tôi sẽ liên hệ cho anh/chị ngay!
+              Cảm ơn anh/chị đã đặt hàng. Vui lòng để ý điện thoại, chúng tôi sẽ
+              liên hệ xác nhận ngay!
             </p>
             <button
               type="button"
