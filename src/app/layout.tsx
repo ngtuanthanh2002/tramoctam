@@ -68,9 +68,12 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
-    icon: [{ url: "/images/hero.webp", type: "image/webp" }],
+    icon: [
+      { url: "/images/hero.webp", type: "image/webp" },
+      { url: "/favicon.png", type: "image/png", sizes: "48x48" },
+    ],
     shortcut: "/images/hero.webp",
-    apple: "/images/hero.webp",
+    apple: [{ url: "/images/hero.webp", type: "image/webp" }],
   },
 };
 

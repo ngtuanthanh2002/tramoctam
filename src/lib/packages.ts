@@ -12,12 +12,12 @@ export const PACKAGES: PackageOption[] = [
   },
   {
     id: "2",
-    label: "✅Mua 2 Hộp: 299K - 30K Ship",
+    label: "✅Mua 2 Hộp: 299K - Miễn Ship",
     price: 299000,
   },
   {
     id: "3",
-    label: "✅Mua 3 Tặng 1 (Tổng 4 Hộp): 399K - 30K Ship",
+    label: "✅Mua 3 Tặng 1 (Tổng 4 Hộp): 399K - Miễn Ship",
     price: 399000,
   },
 ];
