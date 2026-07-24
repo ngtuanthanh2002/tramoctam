@@ -8,7 +8,7 @@ type OrderFormProps = {
 };
 
 const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbyrxEMhwufRRp1ishEW20M0Iz2jTT4dA1MugxmxY1pQU-tD4oUWjuOdIgNCA-H3jY4/exec";
+  "https://script.google.com/macros/s/AKfycbzanZyy1-EGW9sGAlk_hrIN2vTdz7eC6NryYVe_R1tUaQUxK3NnuS1FdoHhSRnQIC-b/exec";
 
 export default function OrderForm({ id = "order-form" }: OrderFormProps) {
   const [fullName, setFullName] = useState("");
